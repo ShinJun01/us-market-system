@@ -1,0 +1,19 @@
+# Stock Selection Universe (설계서 5장). Phase 2에서 사용.
+version: "1.0.0"
+base_indices: [SP500, NASDAQ100, SP400]
+hard_gates:
+  g1_addv_min_usd: 30000000
+  g2_price_min: 10.0
+  g3_atr_pct_min: 0.012
+  g4_atr_pct_max: 0.09
+  g5_trend: {default: ema200, caution_or_below: ema50}
+composite_weights:   # 초기 가설값. IC 측정 후에만 조정. 성과 최대화 튜닝 금지.
+  f1_relative_strength: 0.30
+  f2_trend_quality: 0.20
+  f3_near_52w_high: 0.15
+  f4_volume_expansion: 0.15
+  f5_sector_strength: 0.10
+  f6_vol_stability: 0.10
+ranking:
+  max_per_sector: 3
+  max_candidates_by_regime: {STRONG_BULL: 10, BULL: 8, NEUTRAL: 5, CAUTION: 3, RISK_OFF: 0, CRISIS: 0}

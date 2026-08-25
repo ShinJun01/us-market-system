@@ -1,0 +1,19 @@
+# Risk Management Layer (설계서 10장). Phase 3에서 사용. Phase 1에서는 참조만 한다.
+version: "1.0.0"
+account: {base_currency: USD, initial_equity: 100000}
+l1_trade: {risk_pct_full: 0.0100, risk_pct_standard: 0.0075, risk_pct_half: 0.0050, stop_atr_multiple: 1.5}
+l2_position: {min_weight: 0.01}      # max_weight는 regime.yaml per_name을 따름
+l3_cluster: {max_sector_exposure: 0.25, max_correlated_cluster: 0.30, correlation_lookback: 60, correlation_threshold: 0.70}
+l4_portfolio: {max_portfolio_heat: 0.06}
+l5_time: {daily_loss_limit: -0.020, weekly_loss_limit: -0.050}
+l6_drawdown:
+  ladder:
+    - {dd: -0.08, action: halve_risk}
+    - {dd: -0.12, action: no_new_entry}
+    - {dd: -0.18, action: liquidate_and_halt}
+l7_structural: {no_hold_through_earnings: true, earnings_blackout_days_before: 5, earnings_blackout_days_after: 1}
+raer_buckets:
+  - {min: 75, size: full}
+  - {min: 60, size: standard}
+  - {min: 45, size: half}
+  - {min: 0,  size: none}

@@ -1,0 +1,21 @@
+# 데이터 소스 설정
+# provider: synthetic | yahoo
+#   synthetic = 합성 데이터. 네트워크 없이 파이프라인 검증용. 실제 판단 근거로 사용 금지.
+#   yahoo     = yfinance. 로컬(집)에서 사용. Phase 1 무료 검증용.
+provider: synthetic
+cache_dir: data/cache
+start_date: "2015-01-01"
+
+# 레짐 엔진 필수 심볼. 하나라도 없으면 V6 커버리지 게이트에서 HALT.
+symbols:
+  index:      [SPY, QQQ, IWM, RSP]
+  volatility: ["^VIX", "^VIX9D", "^VIX3M"]
+  rates_fx:   ["^TNX", "DX-Y.NYB"]
+  credit:     [HYG, IEF]
+  sectors:    [XLK, XLF, XLV, XLY, XLP, XLI, XLE, XLU, XLRE, XLB, XLC]
+
+breadth:
+  mode: proxy        # proxy | compute
+  # proxy   : RSP/SPY 등에서 근사. 정확도 낮음 -> Phase 2 전에 compute로 전환 필수.
+  # compute : S&P500 구성종목 전체 일봉으로 %above50DMA / %above200DMA / NH-NL 직접 계산.
+  constituents_file: config/sp500_constituents.csv
