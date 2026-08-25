@@ -2,7 +2,9 @@ pandas>=2.0
 numpy>=1.24
 pyyaml>=6.0
 pyarrow>=14.0
+tabulate>=0.9
 pytest>=7.4
 # --- 로컬(집)에서만 필요. 샌드박스는 네트워크 차단으로 사용 불가 ---
 yfinance>=0.2.40
 requests>=2.31
+beautifulsoup4>=4.12  # config/sp500_constituents.csv 최초 생성 시 1회용

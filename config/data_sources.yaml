@@ -15,7 +15,7 @@ symbols:
   sectors:    [XLK, XLF, XLV, XLY, XLP, XLI, XLE, XLU, XLRE, XLB, XLC]
 
 breadth:
-  mode: proxy        # proxy | compute
+  mode: compute       # proxy | compute
   # proxy   : RSP/SPY 등에서 근사. 정확도 낮음 -> Phase 2 전에 compute로 전환 필수.
   # compute : S&P500 구성종목 전체 일봉으로 %above50DMA / %above200DMA / NH-NL 직접 계산.
   constituents_file: config/sp500_constituents.csv

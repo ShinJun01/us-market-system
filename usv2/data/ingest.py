@@ -66,6 +66,58 @@ def _proxy_breadth(close: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def _universe_close(cfg: dict, start: str, end: str | None) -> pd.DataFrame:
+    """S&P500 구성종목 종가 패널. 로컬 parquet 캐시 우선, 없으면 yfinance 배치 다운로드.
+
+    500종목 × 10년치라 매번 받으면 느리고 야후 쪽 요청도 많아진다.
+    최초 1회만 받고 이후에는 캐시를 쓴다(NEXT_STEPS.md 3번).
+    캐시를 새로 받고 싶으면 캐시 파일을 지우면 된다 — 별도 만료 로직은 두지 않는다.
+    """
+    constituents_file = Path(cfg["breadth"]["constituents_file"])
+    if not constituents_file.exists():
+        raise FileNotFoundError(
+            f"{constituents_file} 없음. 먼저 `python scripts/fetch_sp500_constituents.py` 실행."
+        )
+    symbols = pd.read_csv(constituents_file)["symbol"].tolist()
+
+    cache_path = Path(cfg.get("cache_dir", "data/cache")) / "sp500_close.parquet"
+    if cache_path.exists():
+        return pd.read_parquet(cache_path)
+
+    import yfinance as yf
+
+    raw = yf.download(symbols, start=start, end=end, auto_adjust=True,
+                       progress=False, threads=True, group_by="ticker")
+    close = pd.DataFrame({
+        s: raw[s]["Close"] for s in symbols if s in raw.columns.get_level_values(0)
+    }).sort_index()
+    close = close.dropna(how="all")
+
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    close.to_parquet(cache_path)
+    return close
+
+
+def _compute_breadth(cfg: dict, start: str, end: str | None) -> pd.DataFrame:
+    """실제 breadth (설계서 5장 F5 계열): S&P500 구성종목 전체에서 직접 계산.
+
+    _proxy_breadth의 근사(RSP/SPY)를 대체한다. "지수는 신고가인데 내부 종목
+    절반이 하락 추세"인 분배 국면은 개별 종목을 안 보면 감지할 수 없다.
+    """
+    close = _universe_close(cfg, start, end)
+
+    out = pd.DataFrame(index=close.index)
+    out["pct_above_50dma"] = (close > close.rolling(50).mean()).mean(axis=1) * 100.0
+    out["pct_above_200dma"] = (close > close.rolling(200).mean()).mean(axis=1) * 100.0
+
+    roll_max = close.rolling(252, min_periods=100).max()
+    roll_min = close.rolling(252, min_periods=100).min()
+    nh = (close >= roll_max).sum(axis=1)
+    nl = (close <= roll_min).sum(axis=1)
+    out["nh_nl"] = nh - nl
+    return out
+
+
 def ingest(config_path: str | Path = "config/data_sources.yaml",
            end: str | None = None,
            ref_date: dt.date | None = None) -> IngestResult:
@@ -83,14 +135,16 @@ def ingest(config_path: str | Path = "config/data_sources.yaml",
     close = close.dropna(how="all")
 
     mode = cfg.get("breadth", {}).get("mode", "proxy")
-    if mode == "proxy":
+    if mode == "compute" and provider.name == "yahoo":
+        breadth = _compute_breadth(cfg, cfg["start_date"], end)
+        breadth = breadth.reindex(close.index).ffill()
+        breadth.attrs["is_proxy"] = False
+    else:
+        if mode == "compute":
+            print(f"[ingest] breadth.mode=compute는 yahoo provider 전용. "
+                  f"provider={provider.name} -> proxy로 대체")
         breadth = _proxy_breadth(close)
         breadth.attrs["is_proxy"] = True
-    else:
-        raise NotImplementedError(
-            "breadth.mode=compute는 Phase 2에서 구현합니다. "
-            "S&P500 구성종목 일봉 전체가 필요합니다."
-        )
 
     md = MarketData(close=close, breadth=breadth)
     return IngestResult(md, report, bars, provider.name)

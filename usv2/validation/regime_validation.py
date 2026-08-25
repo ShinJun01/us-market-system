@@ -61,7 +61,9 @@ def monotonicity_score(table: pd.DataFrame, horizon: int = 20) -> dict:
 
     expected = pd.Series(range(len(present), 0, -1), index=present, dtype=float)
     actual = table.loc[present, col].astype(float)
-    rho = expected.corr(actual, method="spearman")
+    # ponytail: scipy 없이 순위 피어슨으로 스피어만 상관 계산 (수학적으로 동일).
+    # scipy는 이 환경의 애플리케이션 제어 정책에 DLL 로드가 차단됨.
+    rho = expected.rank().corr(actual.rank())
 
     strict = all(
         actual.loc[present[i]] >= actual.loc[present[i + 1]]
