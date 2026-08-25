@@ -25,7 +25,7 @@ REGIME_KR = {
 
 def build_facts(reg: dict, sectors: dict, meta: dict) -> dict:
     """SIGNAL 계층 딕셔너리. numeric_guard의 허용 수치 소스이기도 하다."""
-    return {"regime": reg, "sectors": sectors, "meta": meta}
+    return {"regime": reg, "sectors": sectors, "meta": meta, "pillar_max": 25}
 
 
 def render(reg: dict, sectors: dict, meta: dict) -> str:

@@ -9,7 +9,7 @@ start_date: "2015-01-01"
 # 레짐 엔진 필수 심볼. 하나라도 없으면 V6 커버리지 게이트에서 HALT.
 symbols:
   index:      [SPY, QQQ, IWM, RSP]
-  volatility: ["^VIX", "^VIX9D", "^VIX3M"]
+  volatility: ["^VIX"]  # ponytail: ^VIX9D/^VIX3M yfinance 미지원(27일 지연)으로 임시 제외, Pillar C -8점. CBOE CSV 어댑터 추가 시 복원
   rates_fx:   ["^TNX", "DX-Y.NYB"]
   credit:     [HYG, IEF]
   sectors:    [XLK, XLF, XLV, XLY, XLP, XLI, XLE, XLU, XLRE, XLB, XLC]
