@@ -1,14 +1,121 @@
 [1/5] 데이터 수집 중...
+[provider:composite] HYG 수집 실패: HYG: 데이터 없음
+[provider:composite] IEF 수집 실패: IEF: 데이터 없음
+[provider:composite] SPY 수집 실패: SPY: 데이터 없음
+[provider:composite] QQQ 수집 실패: QQQ: 데이터 없음
+[provider:composite] IWM 수집 실패: IWM: 데이터 없음
+[provider:composite] RSP 수집 실패: RSP: 데이터 없음
+[provider:composite] ^TNX 수집 실패: ^TNX: 데이터 없음
+[provider:composite] DX-Y.NYB 수집 실패: DX-Y.NYB: 데이터 없음
+[provider:composite] XLK 수집 실패: XLK: 데이터 없음
+[provider:composite] XLF 수집 실패: XLF: 데이터 없음
+[provider:composite] XLV 수집 실패: XLV: 데이터 없음
+[provider:composite] XLY 수집 실패: XLY: 데이터 없음
+[provider:composite] XLP 수집 실패: XLP: 데이터 없음
+[provider:composite] XLI 수집 실패: XLI: 데이터 없음
+[provider:composite] XLE 수집 실패: XLE: 데이터 없음
+[provider:composite] XLU 수집 실패: XLU: 데이터 없음
+[provider:composite] XLRE 수집 실패: XLRE: 데이터 없음
+[provider:composite] XLB 수집 실패: XLB: 데이터 없음
+[provider:composite] XLC 수집 실패: XLC: 데이터 없음
+[composite] ^VIX: cboe 실패 -> yahoo 폴백
+[provider:composite] ^VIX 수집 실패: ^VIX: 데이터 없음
+[composite] ^VIX9D: cboe 실패 -> yahoo 폴백
+[provider:composite] ^VIX9D 수집 실패: ^VIX9D: 데이터 없음
+[composite] ^VIX3M: cboe 실패 -> yahoo 폴백
+[provider:composite] ^VIX3M 수집 실패: ^VIX3M: 데이터 없음
 [2/5] 데이터 검증 (V1~V7)
-PASS (경고 4건)
-  [V4] ^TNX: 급변 4건 (최대 +49.9% @ 2020-03-10) — 분할/조정 오류 의심
-  [V4] ^VIX9D: 급변 2건 (최대 +214.6% @ 2018-02-05) — 분할/조정 오류 의심
-  [V5] SPY: 2차 소스 미설정 (Phase 3 전 필수)
-  [V5] ^VIX: 2차 소스 미설정 (Phase 3 전 필수)
-[3/5] 레짐 계산
-    REGIME=STRONG_BULL total=54.0 (A9.0 B20.0 C25.0 Dnan)
-[4/5] 섹터 랭킹
-[5/5] 브리핑 생성 + Numeric Guard
-    PASS — 수치 39건 전부 검증됨 (면제 17건)
+HALT — 검증 실패 2건
+  [V6] -: 심볼 누락 22/22: ['HYG', 'IEF', 'SPY', 'QQQ', 'IWM', 'RSP', '^TNX', 'DX-Y.NYB', 'XLK', 'XLF', 'XLV', 'XLY', 'XLP', 'XLI', 'XLE', 'XLU', 'XLRE', 'XLB', 'XLC', '^VIX', '^VIX9D', '^VIX3M']
+  [V7] -: 수신 데이터 없음
 
-완료: C:\Users\dmlwn\Downloads\us-market-v2-restore\us-market-v2\reports/brief_20260826.md
+>>> HALT. 브리핑을 생성하지 않습니다.
+>>> 검증되지 않은 데이터로 판단을 내리지 않는 것이 이 시스템의 원칙입니다.
+$HYG: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['HYG']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$IEF: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['IEF']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$SPY: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['SPY']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$QQQ: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['QQQ']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$IWM: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['IWM']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$RSP: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['RSP']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$^TNX: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['^TNX']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$DX-Y.NYB: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['DX-Y.NYB']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$XLK: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['XLK']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$XLF: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['XLF']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$XLV: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['XLV']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$XLY: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['XLY']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$XLP: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['XLP']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$XLI: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['XLI']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$XLE: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['XLE']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$XLU: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['XLU']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$XLRE: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['XLRE']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$XLB: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['XLB']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$XLC: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['XLC']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$^VIX: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['^VIX']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$^VIX9D: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['^VIX9D']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+$^VIX3M: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
+
+1 Failed download:
+['^VIX3M']: possibly delisted; no price data found  (1d 2015-01-01 -> 2026-08-26)
