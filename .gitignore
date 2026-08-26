@@ -11,3 +11,4 @@ reports/*
 *.parquet
 .DS_Store
 config/.runtime_data_sources.yaml
+logs/
