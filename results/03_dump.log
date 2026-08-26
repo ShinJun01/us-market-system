@@ -1,0 +1,6 @@
+[ingest] breadth.mode=compute는 yahoo provider 전용. provider=synthetic -> proxy로 대체
+PASS (경고 2건)
+  [V5] SPY: 2차 소스 미설정 (Phase 3 전 필수)
+  [V5] ^VIX: 2차 소스 미설정 (Phase 3 전 필수)
+prices.csv / breadth.csv 저장
+regime_history.csv 저장 (3040, 33)
