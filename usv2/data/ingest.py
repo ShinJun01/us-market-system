@@ -177,14 +177,18 @@ def ingest(config_path: str | Path = "config/data_sources.yaml",
     close = pd.DataFrame({s: b.df["close"] for s, b in bars.items()}).sort_index()
     close = close.dropna(how="all")
 
+    # _compute_breadth/_universe_close는 provider 객체를 안 쓰고 항상 직접
+    # yfinance를 호출한다. 그래서 실제로 봐야 하는 건 provider 종류가 아니라
+    # "네트워크로 실제 야후 데이터에 닿는가"다 — synthetic은 안 닿고,
+    # cboe 단독은 VIX 계열 외엔 응답하지 않아서 여기선 의미 없다.
     mode = cfg.get("breadth", {}).get("mode", "proxy")
-    if mode == "compute" and provider.name == "yahoo":
+    if mode == "compute" and provider.name in ("yahoo", "composite"):
         breadth = _compute_breadth(cfg, cfg["start_date"], end)
         breadth = breadth.reindex(close.index).ffill()
         breadth.attrs["is_proxy"] = False
     else:
         if mode == "compute":
-            print(f"[ingest] breadth.mode=compute는 yahoo provider 전용. "
+            print(f"[ingest] breadth.mode=compute는 yahoo/composite provider 전용. "
                   f"provider={provider.name} -> proxy로 대체")
         breadth = _proxy_breadth(close)
         breadth.attrs["is_proxy"] = True

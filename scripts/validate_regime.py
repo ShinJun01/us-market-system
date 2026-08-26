@@ -28,7 +28,7 @@ from usv2.validation.regime_validation import (  # noqa: E402
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--provider", choices=["synthetic", "yahoo"], default=None)
+    ap.add_argument("--provider", choices=["synthetic", "yahoo", "cboe", "composite"], default=None)
     ap.add_argument("--horizon", type=int, default=20)
     args = ap.parse_args()
 

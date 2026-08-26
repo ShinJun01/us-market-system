@@ -1,4 +1,3 @@
-[ingest] breadth.mode=compute는 yahoo provider 전용. provider=composite -> proxy로 대체
 PASS (경고 4건)
   [V4] ^TNX: 급변 4건 (최대 +49.9% @ 2020-03-10) — 분할/조정 오류 의심
   [V4] ^VIX9D: 급변 2건 (최대 +214.6% @ 2018-02-05) — 분할/조정 오류 의심
