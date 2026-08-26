@@ -65,6 +65,34 @@ class MarketData:
         return all(s in self.close.columns for s in symbols)
 
 
+
+# 각 Pillar의 명목 만점. 입력 데이터가 빠지면 실제 획득 가능 최대치가 줄어드는데,
+# 레짐 임계값(80/65/45/30/15)은 100점 척도로 잡혀 있다. 환산하지 않으면 총점이
+# 통째로 아래로 밀려 BULL이 NEUTRAL로, NEUTRAL이 CAUTION으로 오분류된다.
+#
+# 예: ^VIX9D/^VIX3M가 없으면 Pillar C 최대치가 25 -> 17로 줄고 총점 최대가 92가 된다.
+PILLAR_NOMINAL_MAX = 25.0
+
+
+def _normalize_pillar(parts: pd.DataFrame, component_max: dict[str, float],
+                      name: str) -> pd.DataFrame:
+    """사용 가능한 항목만으로 얻은 점수를 명목 만점(25) 척도로 환산.
+
+    coverage 컬럼도 함께 남긴다. 브리핑에서 "이 축은 60%의 정보만으로 계산됨"을
+    표시할 수 있어야 한다. 결측을 조용히 메우고 넘어가면 안 된다.
+    """
+    cols = list(component_max)
+    available = parts[cols].notna()
+    avail_max = pd.Series(
+        [sum(component_max[c] for c in cols if available.loc[i, c]) for i in parts.index],
+        index=parts.index, dtype=float,
+    )
+    raw = parts[cols].sum(axis=1, min_count=1)
+    parts[f"{name}_coverage"] = avail_max / sum(component_max.values())
+    parts[name] = (raw / avail_max.replace(0.0, np.nan)) * PILLAR_NOMINAL_MAX
+    return parts
+
+
 # ---------------------------------------------------------------------------
 # Pillar 계산
 # ---------------------------------------------------------------------------
@@ -89,8 +117,11 @@ def pillar_a_trend(md: MarketData, cfg: RegimeConfig) -> pd.DataFrame:
     # 지표가 아직 계산되지 않은 구간(EMA200 워밍업)은 NaN 유지 -> 레짐 미산출
     warm = ema200.notna()
     parts = parts.where(warm)
-    parts["pillar_a"] = parts.sum(axis=1, min_count=1)
-    return parts
+    return _normalize_pillar(parts, {
+        "a_above_200ema": p["spy_above_200ema"], "a_above_50ema": p["spy_above_50ema"],
+        "a_golden": p["golden_alignment"], "a_slope": p["ema50_slope_20d_pos"],
+        "a_qqq_lead": p["qqq_beats_spy_20d"],
+    }, "pillar_a")
 
 
 def pillar_b_breadth(md: MarketData, cfg: RegimeConfig) -> pd.DataFrame:
@@ -136,8 +167,11 @@ def pillar_b_breadth(md: MarketData, cfg: RegimeConfig) -> pd.DataFrame:
     else:
         parts["b_rsp"] = np.nan
 
-    parts["pillar_b"] = parts.sum(axis=1, min_count=1)
-    return parts
+    return _normalize_pillar(parts, {
+        "b_above50": max(p["pct_above_50dma"]["pts"]),
+        "b_above200": max(p["pct_above_200dma"]["pts"]),
+        "b_nhnl": p["nh_nl_5d_positive"], "b_rsp": p["rsp_spy_20d_nonneg"],
+    }, "pillar_b")
 
 
 def pillar_c_volatility(md: MarketData, cfg: RegimeConfig) -> pd.DataFrame:
@@ -181,8 +215,11 @@ def pillar_c_volatility(md: MarketData, cfg: RegimeConfig) -> pd.DataFrame:
         index=rv.index, dtype=float,
     ).where(rv.notna())
 
-    parts["pillar_c"] = parts.sum(axis=1, min_count=1)
-    return parts
+    return _normalize_pillar(parts, {
+        "c_vix_rank": max(p["vix_percentile_252d"]["pts"]),
+        "c_term": max(p["vix_term_structure"]["pts"]),
+        "c_rvol": max(p["realized_vol_20d"]["pts"]),
+    }, "pillar_c")
 
 
 def pillar_d_risk_appetite(md: MarketData, cfg: RegimeConfig) -> pd.DataFrame:
@@ -220,8 +257,10 @@ def pillar_d_risk_appetite(md: MarketData, cfg: RegimeConfig) -> pd.DataFrame:
     else:
         parts["d_dollar"] = np.nan
 
-    parts["pillar_d"] = parts.sum(axis=1, min_count=1)
-    return parts
+    return _normalize_pillar(parts, {
+        "d_credit": p["hyg_ief_above_50dma"], "d_iwm": p["iwm_vs_spy_pts"],
+        "d_rates": p["tnx_pts"], "d_dollar": p["dxy_below_50dma"],
+    }, "pillar_d")
 
 
 # ---------------------------------------------------------------------------
@@ -404,6 +443,10 @@ def latest_regime(regime_df: pd.DataFrame) -> dict:
         "pillar_b": round(float(row["pillar_b"]), 1) if pd.notna(row["pillar_b"]) else None,
         "pillar_c": round(float(row["pillar_c"]), 1),
         "pillar_d": round(float(row["pillar_d"]), 1),
+        "coverage_a": round(float(row["pillar_a_coverage"]), 2),
+        "coverage_b": round(float(row["pillar_b_coverage"]), 2),
+        "coverage_c": round(float(row["pillar_c_coverage"]), 2),
+        "coverage_d": round(float(row["pillar_d_coverage"]), 2),
         "entry_blocked": bool(row["entry_blocked"]),
         "override_reason": row["override_reason"] or "none",
         "exposure_cap": float(row["exposure_cap"]),

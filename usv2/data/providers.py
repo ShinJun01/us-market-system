@@ -279,10 +279,120 @@ class YahooProvider(DataProvider):
         )
 
 
+
+
+# ---------------------------------------------------------------------------
+# CBOE 공식 CSV (VIX 계열 전용, 로컬 전용)
+# ---------------------------------------------------------------------------
+class CboeProvider(DataProvider):
+    """CBOE가 공개하는 지수 히스토리 CSV 어댑터.
+
+    왜 필요한가
+    -----------
+    yfinance는 ^VIX9D / ^VIX3M을 안정적으로 주지 않는다. 이 둘이 빠지면
+    Pillar C에서 기간구조 8점이 사라지는데, 기간구조(백워데이션)는 VIX 레벨과
+    달리 **선행성이 있는 유일한 스트레스 신호**다. 레벨만 남기면 레짐 엔진이
+    급락을 사후에만 인지하게 된다.
+
+    CBOE는 인증 없이 일별 CSV를 공개한다.
+
+    !!! 이 어댑터는 샌드박스에서 네트워크가 차단되어 실제 응답으로 검증하지
+        못했다. 첫 실행 시 컬럼명/URL을 반드시 확인할 것. 실패하면 예외 메시지에
+        받은 헤더가 찍히도록 해 두었다. !!!
+    """
+
+    name = "cboe"
+
+    _URLS = {
+        "^VIX":    "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv",
+        "^VIX9D":  "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX9D_History.csv",
+        "^VIX3M":  "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX3M_History.csv",
+    }
+
+    def fetch(self, symbol: str, start: str, end: str | None = None) -> Bars:
+        if symbol not in self._URLS:
+            raise ValueError(f"CboeProvider는 {list(self._URLS)}만 지원합니다 (요청: {symbol})")
+        try:
+            import requests
+        except ImportError as e:
+            raise RuntimeError("requests가 필요합니다: pip install requests") from e
+
+        url = self._URLS[symbol]
+        resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=30)
+        resp.raise_for_status()
+
+        import io as _io
+        df = pd.read_csv(_io.StringIO(resp.text))
+        df.columns = [str(c).strip().lower() for c in df.columns]
+
+        date_col = next((c for c in df.columns if "date" in c), None)
+        if date_col is None:
+            raise RuntimeError(f"{symbol}: 날짜 컬럼을 찾지 못함. 받은 헤더={list(df.columns)}")
+
+        rename = {}
+        for want in ("open", "high", "low", "close"):
+            match = next((c for c in df.columns if c == want or c.endswith(want)), None)
+            if match is None:
+                raise RuntimeError(f"{symbol}: '{want}' 컬럼 없음. 받은 헤더={list(df.columns)}")
+            rename[match] = want
+
+        df = df.rename(columns=rename)
+        df.index = pd.to_datetime(df[date_col]).values
+        df = df[["open", "high", "low", "close"]].astype(float).sort_index()
+        df["volume"] = 0.0
+
+        df = df.loc[df.index >= pd.Timestamp(start)]
+        if end:
+            df = df.loc[df.index <= pd.Timestamp(end)]
+        if df.empty:
+            raise RuntimeError(f"{symbol}: 기간 내 데이터 없음 ({start}~{end})")
+
+        return Bars(symbol, df, source=f"cboe:{url}",
+                    fetched_at=dt.datetime.now(dt.timezone.utc).replace(tzinfo=None))
+
+
+class CompositeProvider(DataProvider):
+    """심볼별로 다른 프로바이더를 라우팅한다.
+
+    VIX 계열은 CBOE, 나머지는 Yahoo — 이런 조합이 Phase 1의 현실적 최선이다.
+    """
+
+    name = "composite"
+
+    def __init__(self, routes: dict[str, str], default: str = "yahoo") -> None:
+        self._providers: dict[str, DataProvider] = {}
+        self._routes = routes
+        self._default = default
+
+    def _get(self, name: str) -> DataProvider:
+        if name not in self._providers:
+            self._providers[name] = get_provider(name)
+        return self._providers[name]
+
+    def fetch(self, symbol: str, start: str, end: str | None = None) -> Bars:
+        target = self._routes.get(symbol, self._default)
+        try:
+            return self._get(target).fetch(symbol, start, end)
+        except Exception:
+            if target != self._default:
+                # CBOE 실패 시 Yahoo로 폴백. 어느 쪽에서 왔는지는 Bars.source에 남는다.
+                print(f"[composite] {symbol}: {target} 실패 -> {self._default} 폴백")
+                return self._get(self._default).fetch(symbol, start, end)
+            raise
+
+
 def get_provider(name: str, **kwargs) -> DataProvider:
     name = name.lower()
     if name == "synthetic":
         return SyntheticProvider(**kwargs)
     if name == "yahoo":
         return YahooProvider()
+    if name == "cboe":
+        return CboeProvider()
+    if name == "composite":
+        # VIX 계열만 CBOE, 나머지는 Yahoo
+        return CompositeProvider(
+            routes={"^VIX": "cboe", "^VIX9D": "cboe", "^VIX3M": "cboe"},
+            default="yahoo",
+        )
     raise ValueError(f"알 수 없는 provider: {name}")
