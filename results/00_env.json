@@ -1,5 +1,5 @@
 {
-  "생성시각": "2026-08-30T13:53:01",
+  "생성시각": "2026-09-02T04:06:47",
   "python": "3.14.2",
   "platform": "Windows-11-10.0.26200-SP0",
   "pandas": "3.0.5",
@@ -7,6 +7,6 @@
   "yfinance": "1.6.0",
   "pyarrow": "25.0.1",
   "requests": "2.34.2",
-  "commit": "85fecfc",
+  "commit": "a99253c",
   "branch": "main"
 }
