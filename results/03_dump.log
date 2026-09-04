@@ -4,4 +4,4 @@ PASS (경고 4건)
   [V5] SPY: 2차 소스 미설정 (Phase 3 전 필수)
   [V5] ^VIX: 2차 소스 미설정 (Phase 3 전 필수)
 prices.csv / breadth.csv 저장
-regime_history.csv 저장 (2966, 33)
+regime_history.csv 저장 (2969, 33)
