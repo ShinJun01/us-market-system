@@ -6,7 +6,7 @@ PASS (경고 4건)
   [V5] SPY: 2차 소스 미설정 (Phase 3 전 필수)
   [V5] ^VIX: 2차 소스 미설정 (Phase 3 전 필수)
 [3/5] 레짐 계산
-    REGIME=BULL total=54.0 (A9.0 B20.0 C25.0 Dnan)
+    REGIME=BULL total=74.5 (A21.0 B16.0 C25.0 D12.5)
 [4/5] 섹터 랭킹
 [5/5] 브리핑 생성 + Numeric Guard
     PASS — 수치 39건 전부 검증됨 (면제 17건)
