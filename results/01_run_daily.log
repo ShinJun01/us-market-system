@@ -1,4 +1,5 @@
 [1/5] 데이터 수집 중...
+[ingest] 구성종목 503/503 수신 (100.0%)
 [2/5] 데이터 검증 (V1~V7)
 PASS (경고 4건)
   [V4] ^TNX: 급변 4건 (최대 +49.9% @ 2020-03-10) — 분할/조정 오류 의심
@@ -6,9 +7,9 @@ PASS (경고 4건)
   [V5] SPY: 2차 소스 미설정 (Phase 3 전 필수)
   [V5] ^VIX: 2차 소스 미설정 (Phase 3 전 필수)
 [3/5] 레짐 계산
-    REGIME=BULL total=74.5 (A21.0 B16.0 C25.0 D12.5)
+    REGIME=NEUTRAL total=37.8 (A9.0 B3.8 C25.0 Dnan)
 [4/5] 섹터 랭킹
 [5/5] 브리핑 생성 + Numeric Guard
-    PASS — 수치 39건 전부 검증됨 (면제 17건)
+    PASS — 수치 38건 전부 검증됨 (면제 17건)
 
-완료: C:\Users\dmlwn\Downloads\us-market-v2-restore\us-market-v2\reports/brief_20260904.md
+완료: C:\Users\dmlwn\Downloads\us-market-v2-restore\us-market-v2\reports/brief_20260928.md
